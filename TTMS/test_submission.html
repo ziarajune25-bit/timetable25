@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form Submission</title>
+</head>
+<body>
+    <h1>Test Add Subject</h1>
+    
+    <form id="testForm" method="POST" action="http://127.0.0.1:5000/add_subject">
+        <input type="text" name="code" value="TEST001" required>
+        <input type="text" name="name" value="Test Subject" required>
+        <select name="year" required>
+            <option value="I">I</option>
+        </select>
+        <select name="course_id" required>
+            <option value="1">AI & DS</option>
+        </select>
+        <input type="number" name="weekly_hours" value="4" required>
+        <button type="submit">Submit Form</button>
+    </form>
+
+    <h1>Test Add Faculty</h1>
+    
+    <form id="testForm2" method="POST" action="http://127.0.0.1:5000/add_faculty">
+        <input type="text" name="staff_code" value="FAC001" required>
+        <input type="text" name="name" value="Test Faculty" required>
+        <input type="text" name="department" value="CSE" required>
+        <input type="number" name="max_hours" value="20" required>
+        
+        <label>Subjects:</label>
+        <select name="subjects" multiple required>
+            <option value="1">Subject 1</option>
+            <option value="2">Subject 2</option>
+        </select>
+        
+        <button type="submit">Submit Faculty</button>
+    </form>
+
+    <h1>Test Generate</h1>
+    
+    <form id="testForm3" method="POST" action="http://127.0.0.1:5000/generate">
+        <select name="year" required>
+            <option value="I">I</option>
+        </select>
+        <select name="course_id" required>
+            <option value="1">AI & DS</option>
+        </select>
+        <button type="submit">Generate</button>
+    </form>
+
+    <script>
+        document.getElementById('testForm').onsubmit = function(e) {
+            console.log("Form submitted!");
+            return true;
+        };
+    </script>
+</body>
+</html>

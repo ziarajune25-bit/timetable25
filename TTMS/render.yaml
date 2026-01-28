@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ttms
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.4
+      - key: FLASK_ENV
+        value: production
+      - key: DB_HOST
+        value: your-database-host
+      - key: DB_USER
+        value: your-database-user
+      - key: DB_PASSWORD
+        value: your-database-password
+      - key: DB_NAME
+        value: timetable_db4
+      - key: SECRET_KEY
+        value: your-secret-key-here

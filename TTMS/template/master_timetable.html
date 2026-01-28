@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Master Timetable{% endblock %}
+
+{% block content %}
+<div class="timetable-header">
+    <h1 style="margin: 5px 0; font-size: 24px;">Master Timetable</h1>
+    <p style="color: #666; margin-top: 10px;">View timetables for all years - Admin Only</p>
+</div>
+
+<div class="timetable-container" style="margin-top: 30px;">
+    <!-- YEAR FILTER -->
+    <div style="margin-bottom: 20px;">
+        <label for="yearFilter" style="font-weight: bold; margin-right: 10px;">Filter by Year:</label>
+        <select id="yearFilter" onchange="loadTimetable()" style="padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ddd;">
+            <option value="all">All Years</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+        </select>
+    </div>
+
+    <br>
+
+    <!-- TIMETABLE TABLE -->
+    <table border="1" width="100%" style="border-collapse: collapse; margin-top: 20px;">
+        <thead style="background-color: #f5f5f5;" id="tableHead">
+            <tr>
+                <th style="padding: 12px;">Day</th>
+                <!-- Periods will be populated by JavaScript -->
+            </tr>
+        </thead>
+        <tbody id="timetableBody" style="text-align: center;">
+            <tr>
+                <td colspan="8" style="padding: 20px; color: #999;">Loading timetable...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<br><br>
+<div style="text-align: center;">
+    <a class="btn" href="/admin" style="background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Back to Admin Dashboard</a>
+</div>
+
+<script>
+let periods = [];
+
+// Fetch periods from backend
+function loadPeriods() {
+    fetch(`/api/periods`)
+        .then(res => res.json())
+        .then(data => {
+            periods = data;
+            buildTableHeader();
+        })
+        .catch(error => {
+            console.error('Error loading periods:', error);
+            // Fallback to default periods
+            periods = [
+                {period_no: 1, start_time: '09:30', end_time: '10:20'},
+                {period_no: 2, start_time: '10:20', end_time: '11:10'},
+                {period_no: 3, start_time: '11:20', end_time: '12:10'},
+                {period_no: 4, start_time: '12:10', end_time: '13:00'},
+                {period_no: 5, start_time: '14:00', end_time: '14:50'},
+                {period_no: 6, start_time: '14:50', end_time: '15:40'},
+                {period_no: 7, start_time: '14:00', end_time: '14:45'}
+            ];
+            buildTableHeader();
+        });
+}
+
+// Build table header with periods
+function buildTableHeader() {
+    const thead = document.getElementById("tableHead");
+    let headerHTML = '<tr><th style="padding: 12px;">Day</th>';
+    
+    periods.forEach(p => {
+        const start = p.start_time.substring(0, 5);
+        const end = p.end_time.substring(0, 5);
+        headerHTML += `<th style="padding: 12px;">P${p.period_no}<br/>${start}–${end}</th>`;
+    });
+    
+    headerHTML += '</tr>';
+    thead.innerHTML = headerHTML;
+}
+
+function loadTimetable() {
+    const year = document.getElementById("yearFilter").value;
+    const body = document.getElementById("timetableBody");
+    
+    // Show loading state
+    const colSpan = periods.length + 1;
+    body.innerHTML = `<tr><td colspan="${colSpan}" style="padding: 20px; color: #999;">Loading timetable...</td></tr>`;
+
+    fetch(`/get_timetable?year=${year}`)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch timetable');
+            }
+            return res.json();
+        })
+        .then(data => {
+            body.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                body.innerHTML = `<tr><td colspan="${colSpan}" style="padding: 20px; color: #999;">No timetable data available</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                let html = `<tr><td style="padding: 12px; font-weight: bold;">${row.day}</td>`;
+                
+                // Build cells for each period
+                for (let i = 1; i <= periods.length; i++) {
+                    const periodKey = `p${i}`;
+                    html += `<td style="padding: 12px;">${row[periodKey] || '—'}</td>`;
+                }
+                
+                html += '</tr>';
+                body.innerHTML += html;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            body.innerHTML = `<tr><td colspan="${colSpan}" style="padding: 20px; color: #999;">Error loading timetable. Please try again.</td></tr>`;
+        });
+}
+
+// Load periods first, then timetable
+window.addEventListener('load', () => {
+    loadPeriods();
+    loadTimetable();
+});
+</script>
+{% endblock %}

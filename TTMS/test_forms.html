@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Forms</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        form { border: 1px solid #ccc; padding: 20px; margin-bottom: 30px; }
+        label { display: block; margin-top: 10px; }
+        input, select { padding: 5px; width: 200px; }
+        button { padding: 10px 20px; background: blue; color: white; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #4CAF50; color: white; }
+        .error { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+
+<h1>Test Subject Form</h1>
+<form id="subjectForm" method="POST" action="http://127.0.0.1:5000/add_subject">
+    <h2>Add Subject</h2>
+    <label>Subject Code: <input type="text" name="code" value="TEST02" required></label>
+    <label>Subject Name: <input type="text" name="name" value="Test Subject 2" required></label>
+    <label>Year: 
+        <select name="year" required>
+            <option value="">-- Select --</option>
+            <option value="I">I</option>
+            <option value="II">II</option>
+            <option value="III">III</option>
+            <option value="IV">IV</option>
+        </select>
+    </label>
+    <label>Course: 
+        <select name="course_id" required>
+            <option value="">-- Select --</option>
+            <option value="1">AI & DS</option>
+            <option value="2">CSE</option>
+        </select>
+    </label>
+    <label>Weekly Hours: <input type="number" name="weekly_hours" value="4" required></label>
+    <button type="submit">Submit Subject</button>
+</form>
+
+<div id="result"></div>
+
+<script>
+document.getElementById('subjectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        code: formData.get('code'),
+        name: formData.get('name'),
+        year: formData.get('year'),
+        course_id: formData.get('course_id'),
+        weekly_hours: formData.get('weekly_hours')
+    };
+    
+    console.log('Submitting:', data);
+    
+    fetch('http://127.0.0.1:5000/add_subject', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+        const result = document.getElementById('result');
+        result.className = data.success ? 'result success' : 'result error';
+        result.textContent = data.message;
+    })
+    .catch(err => {
+        document.getElementById('result').className = 'result error';
+        document.getElementById('result').textContent = 'Error: ' + err;
+    });
+});
+</script>
+
+</body>
+</html>
